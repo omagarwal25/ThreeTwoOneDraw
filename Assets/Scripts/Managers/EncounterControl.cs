@@ -8,6 +8,9 @@ using UnityEngine.SceneManagement;
 
 public class EncounterControl : MonoBehaviour
 {
+    //Temp variable that says whether the mouse controls hand traversal or not
+    public bool mouseMode = false;
+
     //Create a single, static instance of this manager that will be referenced 
     public static EncounterControl Instance { get; private set; }
 
@@ -121,7 +124,7 @@ public class EncounterControl : MonoBehaviour
     {
         if (currEncounter.player.hand.Count > 1)
         {
-            return new Vector2((currPlayer.hand.Count * 1.45F) / (float)(currPlayer.hand.Count - 1) * (num - ((float)(currPlayer.hand.Count) / 3)), -4);
+            return new Vector2((currPlayer.hand.Count * 1.45F) / (float)(currPlayer.hand.Count - 1) * (num - ((float)(currPlayer.hand.Count) / 3)) + num, -4);
         }
         else
         {
@@ -135,6 +138,11 @@ public class EncounterControl : MonoBehaviour
     {
         if (combat)
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
+
             //Calculate the current health of the enemy and player
             playerHealthBar.value = (float)currPlayer.health / currPlayer.maxHealth;
             enemyHealthBar.value = (float)currEnemy.health / currEnemy.maxHealth;
@@ -173,7 +181,7 @@ public class EncounterControl : MonoBehaviour
                     SoundManager.playSound(SoundType.Reload);
                 }
                 //Exit the card selection if the player clicks S
-                else if (Input.GetKeyDown(KeyCode.DownArrow))
+                else if (Input.GetKeyDown(KeyCode.DownArrow) && !mouseMode)
                 {
                     position = -1;
                     if (hoveredCard != null)
@@ -183,7 +191,7 @@ public class EncounterControl : MonoBehaviour
                     }
                 }
                 //Move the index of the selected card right when the playef clicks D
-                else if (Input.GetKeyDown(KeyCode.RightArrow))
+                else if (Input.GetKeyDown(KeyCode.RightArrow) && !mouseMode)
                 {
                     if (position == -1 || position == currPlayer.hand.Count - 1)
                     {
@@ -195,7 +203,7 @@ public class EncounterControl : MonoBehaviour
                     }
                     //Move the index of the selected card left when the playef clicks A
                 }
-                else if (Input.GetKeyDown(KeyCode.LeftArrow))
+                else if (Input.GetKeyDown(KeyCode.LeftArrow) && !mouseMode)
                 {
                     if (position == -1 || position == 0)
                     {

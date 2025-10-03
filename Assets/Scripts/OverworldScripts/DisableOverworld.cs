@@ -9,6 +9,7 @@ public class DisableOverworld : MonoBehaviour
     [SerializeField]
     public string Combat = "CombatDemo";
     public string Overworld = "OverworldWildWest";
+    public GameObject player;
 
 
     public static DisableOverworld Instance { get; private set; }
@@ -38,6 +39,8 @@ public class DisableOverworld : MonoBehaviour
             Debug.Log("EncounterControl.Instance is null!");
         }
 
+        MusicManager.audioSource.Stop();
+        player.GetComponent<SpriteMovement>().isFrozen = !state;
         foreach (GameObject singleObject in allObjects)
         {
             singleObject.SetActive(state);
