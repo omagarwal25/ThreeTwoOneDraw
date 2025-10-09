@@ -6,17 +6,20 @@ using System;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 
-public class Bandit : Enemy
+public class BanditBoss : Enemy
 {
     System.Random random = new System.Random();
 
-    public Bandit() : base(new List<AbstractCard>(), 100, 1, "Bandit")
+    public BanditBoss() : base(new List<AbstractCard>(), 125, -1, "Bandit Boss")
     {
         for (int i = 0; i < 6; i++)
         {
             deck.Add(new Defend());
-            deck.Add(new SixShooterBullet(Speed.Sluggish));
-            deck.Add(new Dynamite());
+            deck.Add(new Bandage());
+            deck.Add(new SixShooterBullet(Speed.Fast));
         }
+
+        deck.Add(new Dynamite());
+
     }
 }

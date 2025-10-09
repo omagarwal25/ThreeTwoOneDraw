@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 public class EncounterControl : MonoBehaviour
 {
     //Temp variable that says whether the mouse controls hand traversal or not
-    public bool mouseMode = false;
+    public bool mouseMode = true;
 
     //Create a single, static instance of this manager that will be referenced 
     public static EncounterControl Instance { get; private set; }
@@ -37,8 +37,11 @@ public class EncounterControl : MonoBehaviour
     public Slider playerHealthBar;
     public Slider enemyHealthBar;
 
+    [SerializeField]
     private SpriteRenderer discardSpriteRenderer;
 
+    //Smoke Screen
+    public GameObject smokeScreen;
 
     public List<GameObject> allObjects = new List<GameObject>();
 
@@ -60,6 +63,32 @@ public class EncounterControl : MonoBehaviour
 
     public bool combat;
 
+    //Determines if we are in the tutorial or not
+    public bool tutorial;
+
+    public bool bulletPlayed = false;
+
+    public bool defendPlayed = false;
+
+    public bool takeAimPlayed = false;
+
+    public bool deckRanOut = false;
+    public bool battleStarted = false;
+
+    public GameObject popUp;
+
+    public TextMeshProUGUI textPopUp;
+
+    public TextMeshProUGUI timeSlotInfo;
+
+    [SerializeField]
+    private TextMeshProUGUI drawText;
+    [SerializeField]
+    private TextMeshProUGUI discardPileText;
+    [SerializeField]
+    private SpriteRenderer drawPile;
+    private Sprite cardBack;
+
     //If the instance is the first one, it becomes the Instance.
     //Otherwise is is destroyed
     public void Awake()
@@ -73,19 +102,24 @@ public class EncounterControl : MonoBehaviour
             Instance = this;
             combat = false;
             playerWonLast = false;
+            cardBack = drawPile.sprite;
         }
     }
 
     //Begin the passed Encounter instance
-    public void startEncounter(Encounter encounter)
+    public void startEncounter(Encounter encounter, bool tutorialActive)
     {
+        MusicManager.playSound(MusicType.Tutorial, 0.25F);
+        MusicManager.audioSource.loop = true;
         setUI(true);
+        tutorial = tutorialActive;
         currEnemy = encounter.enemy;
         currPlayer = encounter.player;
         currEncounter = encounter;
 
         currPlayer.addBullets(encounter.weapon.bullets);
         WeaponMono.Instance.activateWeapon(encounter.weapon);
+        timeSlotInfo.text = encounter.weapon.timeSlotInfo;
 
         EnemyStateMachine enemyStateMachine = enemySpritePlaceholder.GetComponent<EnemyStateMachine>();
         enemyStateMachine.encounterController = this;
@@ -100,6 +134,18 @@ public class EncounterControl : MonoBehaviour
         takeAimActive = false;
 
         reapplyHand();
+
+        if (tutorial && !battleStarted)
+        {
+            popUp.SetActive(true);
+            textPopUp.enabled = true;
+            textPopUp.text = "\nWelcome to the duel! You can use your mouse to select cards and play them to your time slots (those" +
+            " little circles on the left)! Just the press the corresponding number key! Your cards will " +
+            "sit there until their time is up and then they'll activate! The time it takes is located on the top left of the cards!" +
+            " Some time slots have special powers, they are detailed on the right! What are you waiting for? Try a few cards out! (Press Return)";
+            battleStarted = true;
+            StartCoroutine(endTutorialPopUp(popUp, textPopUp));
+        }
     }
 
     //Destroy all card prefabs and created a new list of prefabs to visually represent the current hand
@@ -122,13 +168,16 @@ public class EncounterControl : MonoBehaviour
     //Calculate the card prefab position depending on hand size
     public Vector2 cardPosition(int num)
     {
-        if (currEncounter.player.hand.Count > 1)
+        //x-axis offset for UI layout placement
+        int offset = -5;
+
+        if (currEncounter.player.hand.Count >= 1)
         {
-            return new Vector2((currPlayer.hand.Count * 1.45F) / (float)(currPlayer.hand.Count - 1) * (num - ((float)(currPlayer.hand.Count) / 3)) + num, -4);
+            return new Vector2(((8 * 1.45F) / (float)(8 - 1) * (2 * num - ((float)(8) / 3)) + num) + offset, -15);
         }
         else
         {
-            return new Vector2(0, -4);
+            return new Vector2(0 + offset, -8);
         }
 
     }
@@ -138,6 +187,17 @@ public class EncounterControl : MonoBehaviour
     {
         if (combat)
         {
+            if (currEncounter.player.deck.Count == 0)
+            {
+                drawPile.sprite = null;
+            }
+            else
+            {
+                drawPile.sprite = cardBack;
+            }
+            drawText.text = currEncounter.player.deck.Count.ToString();
+            discardPileText.text = currEncounter.player.discardPile.Count.ToString();
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Application.Quit();
@@ -177,6 +237,7 @@ public class EncounterControl : MonoBehaviour
                 //Exit the card selection if the player clicks S
                 if (Input.GetKeyDown(KeyCode.E))
                 {
+                    discardSpriteRenderer.sprite = null;
                     currPlayer.Shuffle();
                     SoundManager.playSound(SoundType.Reload);
                 }
@@ -330,6 +391,9 @@ public class EncounterControl : MonoBehaviour
     //The encounter ends whenever player or enemy reach 0 health
     public void endEncounter(AbstractPlayer winner)
     {
+        MusicManager.audioSource.Stop();
+        MusicManager.playSound(MusicType.Theme, 0.5F);
+
         setUI(false);
 
         //Deactivate all visible cards
@@ -338,6 +402,7 @@ public class EncounterControl : MonoBehaviour
         {
             Destroy(card);
         }
+        discardSpriteRenderer.sprite = null;
 
         //Deactivate all time slots
         GameObject[] visibleSlots = GameObject.FindGameObjectsWithTag("TimeSlot");
@@ -353,13 +418,45 @@ public class EncounterControl : MonoBehaviour
             Destroy(bullet);
         }
 
+        //Deactive smoke screen
+        smokeScreen.SetActive(false);
+
         DefenseManager.Instance.makeInvisible(Type.Small);
     }
 
     //Play the current card to the time slot at the provided index
     public void playCardToSlot(int index)
     {
-
+        if (tutorial)
+        {
+            if (!bulletPlayed && hoveredCard.thisCard.GetCardType() == "Bullet")
+            {
+                popUp.SetActive(true);
+                textPopUp.enabled = true;
+                textPopUp.text = "You've played a Bullet! This town ain't big enough for a cowboy and a cactus! " +
+                "When the timer hits zero, you'll fire a bullet straight for that darn cactus! But, he might be able to block it! (Press Return)";
+                bulletPlayed = true;
+                StartCoroutine(endTutorialPopUp(popUp, textPopUp));
+            }
+            if (!defendPlayed && hoveredCard.thisCard.GetCardType() == "Defend")
+            {
+                popUp.SetActive(true);
+                textPopUp.enabled = true;
+                textPopUp.text = "You've played a Defend! When the timer hits zero, any bullets within your mouse cursor will be blocked!" +
+                " No clicking required! Just make sure your mouse is in the right space when zero comes around! (Press Return)";
+                defendPlayed = true;
+                StartCoroutine(endTutorialPopUp(popUp, textPopUp));
+            }
+            if (!takeAimPlayed && hoveredCard.thisCard.NAME == "Take Aim")
+            {
+                popUp.SetActive(true);
+                textPopUp.enabled = true;
+                textPopUp.text = "You've played a Take Aim! Any bullets that are fired within the two seconds after this card activates are supercharged!" +
+                " These superchared bullets won't be so easy for this cactus to defend! (Press Return)";
+                takeAimPlayed = true;
+                StartCoroutine(endTutorialPopUp(popUp, textPopUp));
+            }
+        }
         //If the time slot does not exist or if it has a card already in it
         if (WeaponMono.Instance.allSlots[index] == null || WeaponMono.Instance.allSlots[index].occupied)
         {
@@ -370,10 +467,57 @@ public class EncounterControl : MonoBehaviour
         StartCoroutine(WeaponMono.Instance.allSlots[index].wait(hoveredCard.thisCard.COST, currPlayer, hoveredCard.thisCard));
 
         //Discard the card
-        currPlayer.Discard(hoveredCard.thisCard);
+        currPlayer.removeFromHand(hoveredCard.thisCard);
+        if (tutorial)
+        {
+            if (!deckRanOut && currPlayer.deck.Count == 0)
+            {
+                popUp.SetActive(true);
+                textPopUp.enabled = true;
+                textPopUp.text = "You've deck has run dry! You won't draw anymore cards because they are all discarded!" +
+                " Don't worry! Just press E and reload! All the cards in the discard will return to the draw pile! (Press Return)";
+                deckRanOut = true;
+                StartCoroutine(endTutorialPopUp(popUp, textPopUp));
+            }
+        }
 
         //Reapply the visuals for the player's hand
         position = (position == 0) ? position + 1 : position - 1;
         reapplyHand();
     }
+
+    //Activate smoke screen
+    public void setUpSmokeScreen()
+    {
+        smokeScreen.SetActive(true);
+    }
+
+    //Deactive smoke screen
+    public void destroySmokeScreen()
+    {
+        smokeScreen.SetActive(false);
+    }
+
+    //Update discard pile sprite
+    public void updateDiscardPile(AbstractCard lastCard)
+    {
+        discardSpriteRenderer.sprite = lastCard.IMAGE;
+        //Set size to match PlaceHolderDeck, remove this line to display full card size
+        discardSpriteRenderer.size = new Vector2(3.875f, 5.85f);
+    }
+    public IEnumerator endTutorialPopUp(GameObject popUp, TextMeshProUGUI textPopUp)
+    {
+        Time.timeScale = 0;
+        combat = false;
+        while (!Input.GetKeyDown(KeyCode.Return))
+        {
+            yield return null;
+        }
+        popUp.SetActive(false);
+        textPopUp.enabled = false;
+        Time.timeScale = 1;
+        combat = true;
+    }
 }
+
+
