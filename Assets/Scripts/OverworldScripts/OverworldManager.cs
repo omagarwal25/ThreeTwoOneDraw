@@ -24,9 +24,12 @@ public class OverworldManager : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            starterDeck.Add(new Defend());
-            starterDeck.Add(new Defend());
-            starterDeck.Add(new TakeAim());
+            // starterDeck.Add(new Defend());
+            // starterDeck.Add(new Defend());
+            // starterDeck.Add(new TakeAim());
+            starterDeck.Add(new ThatWasClose());
+            starterDeck.Add(new ThatWasClose());
+            starterDeck.Add(new ThatWasClose());
         }
 
         MusicManager.playSound(MusicType.Theme, 0.5F);
@@ -39,6 +42,11 @@ public class OverworldManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Application.Quit();
+        }
+
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            StartCoroutine(startCombat(weapon, starterDeck, enemy));
         }
     }
 
