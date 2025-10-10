@@ -3291,7 +3291,7 @@ RectTransform:
   m_Father: {fileID: 1437291638}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: -4.830002, y: 0.03000021}
   m_SizeDelta: {x: 0.1516, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3588,8 +3588,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1145826845}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -4361,7 +4361,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1656953159
 Transform:
   m_ObjectHideFlags: 0
@@ -4371,7 +4371,7 @@ Transform:
   m_GameObject: {fileID: 1656953158}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 13.959999, y: -1.4068916, z: 0}
+  m_LocalPosition: {x: 12, y: -1, z: 0}
   m_LocalScale: {x: 1.4384, y: 1.4384, z: 1.4384}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4422,7 +4422,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: -8236429187428467823, guid: 178435b9d5fcd744e8b7bdc1c2390107, type: 3}
+  m_Sprite: {fileID: -2039495777962805832, guid: c60cc93f76b2ddb42a3679b01729d131, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4443,7 +4443,7 @@ Animator:
   m_GameObject: {fileID: 1656953158}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 9a5e311d84a29d44b855569b3216de90, type: 2}
+  m_Controller: {fileID: 9100000, guid: b7f49af02a152a743ac938d31ef2c1b8, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -4462,7 +4462,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1656953158}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1c304a20c78a55447842d7228148cefd, type: 3}
   m_Name: 
@@ -4471,7 +4471,7 @@ MonoBehaviour:
   ready: 0
   cactusState: {fileID: 9100000, guid: da1ef3ffaa8c0af4882a827dd83070dc, type: 2}
   bossBanditState: {fileID: 9100000, guid: b7f49af02a152a743ac938d31ef2c1b8, type: 2}
-  EnemySprite: {fileID: 0}
+  EnemySprite: {fileID: 9100000, guid: 9a5e311d84a29d44b855569b3216de90, type: 2}
 --- !u!114 &1656953163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4487,7 +4487,7 @@ MonoBehaviour:
   m_CategoryHash: 0.009161512
   m_labelHash: 1.6221687e-25
   m_SpriteKey: 0
-  m_SpriteHash: 570530651
+  m_SpriteHash: 0
 --- !u!114 &1656953164
 MonoBehaviour:
   m_ObjectHideFlags: 0
