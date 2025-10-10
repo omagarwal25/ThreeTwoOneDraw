@@ -46,6 +46,10 @@ public class OverworldManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.B))
         {
+            if (!SceneManager.GetSceneByName("CombatDemo").isLoaded)
+            {
+                SceneManager.LoadScene("CombatDemo", LoadSceneMode.Additive);
+            }
             StartCoroutine(startCombat(weapon, starterDeck, enemy));
         }
     }
