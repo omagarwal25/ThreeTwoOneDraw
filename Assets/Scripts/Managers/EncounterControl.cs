@@ -109,7 +109,7 @@ public class EncounterControl : MonoBehaviour
     //Begin the passed Encounter instance
     public void startEncounter(Encounter encounter, bool tutorialActive)
     {
-        MusicManager.playSound(MusicType.Tutorial, 0.25F);
+        MusicManager.playSound(MusicType.Tutorial, 0.4F);
         MusicManager.audioSource.loop = true;
         setUI(true);
         tutorial = tutorialActive;
@@ -230,6 +230,18 @@ public class EncounterControl : MonoBehaviour
             {
                 currPlayer.Draw();
                 StartCoroutine(wait(currEncounter.weapon.drawDelay, currPlayer));
+                if (tutorial)
+                {
+                    if (!deckRanOut && currPlayer.deck.Count == 0)
+                    {
+                        popUp.SetActive(true);
+                        textPopUp.enabled = true;
+                        textPopUp.text = "You've deck has run dry! You won't draw anymore cards because they are all discarded!" +
+                        " Don't worry! Just press E and reload! All the cards in the discard will return to the draw pile! (Press Return)";
+                        deckRanOut = true;
+                        StartCoroutine(endTutorialPopUp(popUp, textPopUp));
+                    }
+                }
                 reapplyHand();
             }
             if (currEncounter != null)
@@ -393,6 +405,7 @@ public class EncounterControl : MonoBehaviour
     {
         MusicManager.audioSource.Stop();
         MusicManager.playSound(MusicType.Theme, 0.5F);
+        MusicManager.audioSource.loop = true;
 
         setUI(false);
 
@@ -499,18 +512,6 @@ public class EncounterControl : MonoBehaviour
 
         //Discard the card
         currPlayer.removeFromHand(hoveredCard.thisCard);
-        if (tutorial)
-        {
-            if (!deckRanOut && currPlayer.deck.Count == 0)
-            {
-                popUp.SetActive(true);
-                textPopUp.enabled = true;
-                textPopUp.text = "You've deck has run dry! You won't draw anymore cards because they are all discarded!" +
-                " Don't worry! Just press E and reload! All the cards in the discard will return to the draw pile! (Press Return)";
-                deckRanOut = true;
-                StartCoroutine(endTutorialPopUp(popUp, textPopUp));
-            }
-        }
 
         //Reapply the visuals for the player's hand
         position = (position == 0) ? position + 1 : position - 1;
