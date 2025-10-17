@@ -55,6 +55,7 @@ public class BulletManager : MonoBehaviour
 
     private IEnumerator delayShooting(float sec, AbstractPlayer shooter, AbstractBullet bullet, SoundType sound)
     {
+        bool wasTakeAim = EncounterControl.Instance.takeAimActive;
         float duration = sec;
         //While there is time left
         while (duration > 0)
@@ -71,7 +72,7 @@ public class BulletManager : MonoBehaviour
         SoundManager.playSound(sound);
         BulletPrefab newBullet = Instantiate(bulletBlueprint,
             EncounterControl.Instance.playerSpritePlaceholder.transform.position + new Vector3(0, 0.5F, 0), Quaternion.identity) as BulletPrefab;
-        newBullet.setData(bullet, shooter, EncounterControl.Instance.takeAimActive);
+        newBullet.setData(bullet, shooter, wasTakeAim);
         EncounterControl.Instance.takeAimActive = false;
         playerBullet++;
     }
