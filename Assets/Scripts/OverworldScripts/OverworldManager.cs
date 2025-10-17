@@ -41,6 +41,15 @@ public class OverworldManager : MonoBehaviour
         {
             Application.Quit();
         }
+
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            if (!SceneManager.GetSceneByName("CombatDemo").isLoaded)
+            {
+                SceneManager.LoadScene("CombatDemo", LoadSceneMode.Additive);
+            }
+            StartCoroutine(startCombat(weapon, starterDeck, enemy));
+        }
     }
 
     public static IEnumerator startCombat(AbstractWeapon weapon, List<AbstractCard> deck, Enemy enemy)

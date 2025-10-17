@@ -112,7 +112,7 @@ public class EncounterControl : MonoBehaviour
     //Begin the passed Encounter instance
     public void startEncounter(Encounter encounter, bool tutorialActive)
     {
-        MusicManager.playSound(MusicType.Tutorial, 0.25F);
+        MusicManager.playSound(MusicType.Tutorial, 0.4F);
         MusicManager.audioSource.loop = true;
         setUI(true);
         tutorial = tutorialActive;
@@ -233,6 +233,18 @@ public class EncounterControl : MonoBehaviour
             {
                 currPlayer.Draw();
                 StartCoroutine(wait(currEncounter.weapon.drawDelay, currPlayer));
+                if (tutorial)
+                {
+                    if (!deckRanOut && currPlayer.deck.Count == 0)
+                    {
+                        popUp.SetActive(true);
+                        textPopUp.enabled = true;
+                        textPopUp.text = "You've deck has run dry! You won't draw anymore cards because they are all discarded!" +
+                        " Don't worry! Just press E and reload! All the cards in the discard will return to the draw pile! (Press Return)";
+                        deckRanOut = true;
+                        StartCoroutine(endTutorialPopUp(popUp, textPopUp));
+                    }
+                }
                 reapplyHand();
             }
             if (currEncounter != null)
@@ -396,6 +408,7 @@ public class EncounterControl : MonoBehaviour
     {
         MusicManager.audioSource.Stop();
         MusicManager.playSound(MusicType.Theme, 0.5F);
+        MusicManager.audioSource.loop = true;
 
         setUI(false);
 
@@ -470,25 +483,48 @@ public class EncounterControl : MonoBehaviour
 
         if (hoveredCard.thisCard.NAME == "Focus Up") {
             EncounterControl.Instance.focusedUp = true;
+        
+        TimeSlot targetSlot = WeaponMono.Instance.allSlots[index];
+
+        // Check if slot exists
+        if (targetSlot == null)
+        {
+            return;
         }
 
-        //Start the specific time slot's timer with the card that is currently selected
-        StartCoroutine(WeaponMono.Instance.allSlots[index].wait(hoveredCard.thisCard.COST, currPlayer, hoveredCard.thisCard));
+        // Handle override for cards that can override occupied slots
+        if (targetSlot.occupied)
+        {
+            if (hoveredCard.thisCard.CanOverrideSlot())
+            {
+                // Stop the current timer
+                if (targetSlot.currentWaitCoroutine != null)
+                {
+                    StopCoroutine(targetSlot.currentWaitCoroutine);
+                }
+                
+                // Discard the overridden card without activation
+                if (targetSlot.occupyingCard != null)
+                {
+                    currPlayer.addToDiscardPile(targetSlot.occupyingCard);
+                    updateDiscardPile(targetSlot.occupyingCard);
+                }
+                
+                // Reset slot state
+                targetSlot.ResetSlot();
+            }
+            else
+            {
+                // Can't play to occupied slot
+                return;
+            }
+        }
+
+        // Start the time slot's timer with the selected card
+        targetSlot.currentWaitCoroutine = StartCoroutine(targetSlot.wait(hoveredCard.thisCard.COST, currPlayer, hoveredCard.thisCard));
 
         //Discard the card
         currPlayer.removeFromHand(hoveredCard.thisCard);
-        if (tutorial)
-        {
-            if (!deckRanOut && currPlayer.deck.Count == 0)
-            {
-                popUp.SetActive(true);
-                textPopUp.enabled = true;
-                textPopUp.text = "You've deck has run dry! You won't draw anymore cards because they are all discarded!" +
-                " Don't worry! Just press E and reload! All the cards in the discard will return to the draw pile! (Press Return)";
-                deckRanOut = true;
-                StartCoroutine(endTutorialPopUp(popUp, textPopUp));
-            }
-        }
 
         //Reapply the visuals for the player's hand
         position = (position == 0) ? position + 1 : position - 1;
