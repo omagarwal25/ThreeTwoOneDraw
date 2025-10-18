@@ -443,7 +443,7 @@ public class EncounterControl : MonoBehaviour
     //Play the current card to the time slot at the provided index
     public void playCardToSlot(int index)
     {
-        
+
         //If the time slot does not exist or if it has a card already in it
         if (WeaponMono.Instance.allSlots[index] == null || WeaponMono.Instance.allSlots[index].occupied)
         {
@@ -481,9 +481,11 @@ public class EncounterControl : MonoBehaviour
             }
         }
 
-        if (hoveredCard.thisCard.NAME == "Focus Up") {
+        if (hoveredCard.thisCard.NAME == "Focus Up")
+        {
             EncounterControl.Instance.focusedUp = true;
-        
+        }
+
         TimeSlot targetSlot = WeaponMono.Instance.allSlots[index];
 
         // Check if slot exists
@@ -502,14 +504,14 @@ public class EncounterControl : MonoBehaviour
                 {
                     StopCoroutine(targetSlot.currentWaitCoroutine);
                 }
-                
+
                 // Discard the overridden card without activation
                 if (targetSlot.occupyingCard != null)
                 {
                     currPlayer.addToDiscardPile(targetSlot.occupyingCard);
                     updateDiscardPile(targetSlot.occupyingCard);
                 }
-                
+
                 // Reset slot state
                 targetSlot.ResetSlot();
             }
@@ -529,6 +531,7 @@ public class EncounterControl : MonoBehaviour
         //Reapply the visuals for the player's hand
         position = (position == 0) ? position + 1 : position - 1;
         reapplyHand();
+
     }
 
     //Activate smoke screen
@@ -564,5 +567,6 @@ public class EncounterControl : MonoBehaviour
         combat = true;
     }
 }
+
 
 
